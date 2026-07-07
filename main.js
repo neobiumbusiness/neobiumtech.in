@@ -52,4 +52,37 @@ document.addEventListener('DOMContentLoaded', () => {
     revealElements.forEach(el => {
         revealObserver.observe(el);
     });
+
+    // Enhanced Cursor Effect
+    const glow = document.createElement('div');
+    glow.classList.add('cursor-glow');
+    document.body.appendChild(glow);
+
+    const dot = document.createElement('div');
+    dot.classList.add('cursor-dot');
+    document.body.appendChild(dot);
+
+    window.addEventListener('mousemove', (e) => {
+        glow.style.left = `${e.clientX}px`;
+        glow.style.top = `${e.clientY}px`;
+        dot.style.left = `${e.clientX}px`;
+        dot.style.top = `${e.clientY}px`;
+    });
+
+    // Add interactive hover effects
+    const interactiveElements = document.querySelectorAll('a, button, input, select, textarea');
+    interactiveElements.forEach(el => {
+        el.addEventListener('mouseenter', () => {
+            dot.style.transform = 'translate(-50%, -50%) scale(2.5)';
+            dot.style.backgroundColor = '#ff6b6b';
+            glow.style.width = '450px';
+            glow.style.height = '450px';
+        });
+        el.addEventListener('mouseleave', () => {
+            dot.style.transform = 'translate(-50%, -50%) scale(1)';
+            dot.style.backgroundColor = '#ff3333';
+            glow.style.width = '350px';
+            glow.style.height = '350px';
+        });
+    });
 });

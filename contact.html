@@ -54,12 +54,12 @@
                     
                     <div class="info-item">
                         <h5>Our Headquarters</h5>
-                        <p>123 Quality Ave, Tech District<br>San Francisco, CA 94107</p>
+                        <p>22 Omega Business Park, Wagle Estate<br>Thane West, 400604</p>
                     </div>
                     
                     <div class="info-item">
                         <h5>Email Us</h5>
-                        <p>hello@neobium.tech<br>support@neobium.tech</p>
+                        <p>contact@neobiumtech.in</p>
                     </div>
 
                     <div class="info-item">
@@ -69,18 +69,18 @@
                 </div>
                 
                 <div class="contact-form-container reveal">
-                    <form class="contact-form">
+                    <form class="contact-form" action="https://formsubmit.co/contact@neobiumtech.in" method="POST">
                         <div class="form-group">
                             <label for="name">Full Name</label>
-                            <input type="text" id="name" class="form-control" placeholder="John Doe" required>
+                            <input type="text" name="name" id="name" class="form-control" placeholder="John Doe" required>
                         </div>
                         <div class="form-group">
                             <label for="email">Email Address</label>
-                            <input type="email" id="email" class="form-control" placeholder="john@company.com" required>
+                            <input type="email" name="email" id="email" class="form-control" placeholder="john@company.com" required>
                         </div>
                         <div class="form-group">
                             <label for="service">Service of Interest</label>
-                            <select id="service" class="form-control" required>
+                            <select name="service" id="service" class="form-control" required>
                                 <option value="">Select a service...</option>
                                 <option value="automation">Automation Testing</option>
                                 <option value="manual">Manual Testing</option>
@@ -92,8 +92,10 @@
                         </div>
                         <div class="form-group">
                             <label for="message">Your Message</label>
-                            <textarea id="message" class="form-control" placeholder="Tell us about your project..." required></textarea>
+                            <textarea name="message" id="message" class="form-control" placeholder="Tell us about your project..." required></textarea>
                         </div>
+                        <!-- FormSubmit Configuration -->
+                        <input type="hidden" name="_captcha" value="false">
                         <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">Send Message</button>
                     </form>
                 </div>
@@ -119,7 +121,7 @@
                 </div>
                 <div class="footer-contact">
                     <h4>Contact Us</h4>
-                    <p>Email: hello@neobium.tech</p>
+                    <p>Email: contact@neobiumtech.in</p>
                     <p>Phone: +1 (555) 123-4567</p>
                 </div>
             </div>

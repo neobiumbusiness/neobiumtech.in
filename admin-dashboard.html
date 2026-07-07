@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neobium CMS - Advanced Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --bg-hover: #334155;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #3b82f6;
+            --danger: #ef4444;
+            --success: #10b981;
+            --border: #334155;
+        }
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            width: 280px;
+            background-color: var(--bg-card);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            background: var(--bg-card);
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .sidebar-header h2 { margin: 0; font-size: 1.2rem; }
+        .logout-btn { background: none; border: none; color: var(--danger); cursor: pointer; font-weight: bold; }
+        
+        .nav-group {
+            margin-bottom: 1rem;
+        }
+        .nav-group-title {
+            padding: 1rem 1.5rem 0.5rem;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            font-weight: 700;
+        }
+        .nav-item {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: block;
+            color: var(--text-main);
+            text-decoration: none;
+        }
+        .nav-item:hover, .nav-item.active {
+            background-color: var(--bg-hover);
+            border-left: 3px solid var(--primary);
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            background-color: var(--bg-dark);
+        }
+        .topbar {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-card);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .topbar h1 { margin: 0; font-size: 1.5rem; }
+        
+        .view-panel {
+            display: none;
+            padding: 2rem;
+            animation: fadeIn 0.3s;
+        }
+        .view-panel.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* UI Elements */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .card h3 { margin-top: 0; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+        
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; color: var(--text-muted); font-size: 0.9rem; }
+        .form-control {
+            width: 100%; padding: 0.75rem; background: var(--bg-dark); border: 1px solid var(--border);
+            color: white; border-radius: 6px; box-sizing: border-box; font-family: inherit;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem; border-radius: 6px; border: none; cursor: pointer; font-weight: bold;
+            font-family: inherit; transition: opacity 0.2s;
+        }
+        .btn:hover { opacity: 0.9; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        
+        /* Editor Styles */
+        #pageList { list-style: none; padding: 0; margin: 0 0 1rem 0; display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        #pageList li { background: var(--bg-hover); padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; }
+        #pageList li.active { background: var(--primary); }
+        .del-page { color: #ffcccc; background: none; border: none; cursor: pointer; font-size: 1.1rem; padding: 0; line-height: 1; }
+        
+        textarea.code-editor {
+            width: 100%; height: 500px; background: #0f111a; color: #a5b4fc; border: 1px solid var(--border);
+            border-radius: 8px; padding: 1rem; font-family: monospace; font-size: 14px; resize: vertical;
+        }
+        /* Modal Styles */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-content {
+            background: var(--bg-card); width: 600px; max-width: 90%; max-height: 80vh;
+            border-radius: 8px; border: 1px solid var(--border); display: flex; flex-direction: column;
+        }
+        .modal-header { padding: 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .modal-header h3 { margin: 0; }
+        .close-modal { background: none; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; }
+        .modal-body { padding: 1.5rem; overflow-y: auto; flex-grow: 1; }
+        
+        /* Table Styles for History */
+        .history-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        .history-table th, .history-table td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--border); }
+        .history-table tr { cursor: pointer; transition: background 0.2s; }
+        .history-table tr:hover { background: var(--bg-hover); }
+        .badge { padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: bold; }
+        .badge-danger { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+        .badge-success { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; }
+        .badge-warning { background: rgba(245, 158, 11, 0.2); color: #fcd34d; }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>Neobium CMS</h2>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-group-title">Overview</div>
+            <div class="nav-item active" onclick="switchView('view-requirements', this)">Requirement Analysis</div>
+            <div class="nav-item" onclick="switchView('view-ai-workflow', this)">AI Builder Workflow</div>
+            <div class="nav-item" onclick="switchView('view-testing', this)">Testing & QA</div>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-group-title">Content</div>
+            <div class="nav-item" onclick="switchView('view-pages', this)">Page Management</div>
+            <div class="nav-item" onclick="switchView('view-media', this)">Images & Media</div>
+            <div class="nav-item" onclick="switchView('view-forms', this)">Forms & Leads</div>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-group-title">Appearance</div>
+            <div class="nav-item" onclick="switchView('view-theme', this)">Theme & Colors</div>
+            <div class="nav-item" onclick="switchView('view-fonts', this)">Fonts & Typography</div>
+            <div class="nav-item" onclick="switchView('view-layout', this)">Layout & Spacing</div>
+            <div class="nav-item" onclick="switchView('view-header', this)">Header & Navigation</div>
+            <div class="nav-item" onclick="switchView('view-footer', this)">Footer Customization</div>
+            <div class="nav-item" onclick="switchView('view-buttons', this)">Buttons & UI</div>
+            <div class="nav-item" onclick="switchView('view-logo', this)">Logo & Branding</div>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-group-title">Advanced & Settings</div>
+            <div class="nav-item" onclick="switchView('view-seo', this)">SEO Updates</div>
+            <div class="nav-item" onclick="switchView('view-performance', this)">Performance</div>
+            <div class="nav-item" onclick="switchView('view-security', this)">Security</div>
+            <div class="nav-item" onclick="switchView('view-integrations', this)">Integrations</div>
+            <div class="nav-item" onclick="switchView('view-responsive', this)">Responsive Design</div>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+        <div class="topbar">
+            <h1 id="view-title">Requirement Analysis</h1>
+            <div class="topbar-actions">
+                <button class="btn btn-primary" onclick="alert('Configuration saved to local environment.')">Save Global Settings</button>
+            </div>
+        </div>
+
+        <!-- 1. Requirement Analysis -->
+        <div class="view-panel active" id="view-requirements">
+            <div class="card">
+                <h3>Business Goals & Target Audience</h3>
+                <div class="form-group">
+                    <label>Website Purpose</label>
+                    <textarea class="form-control" rows="3">Provide expert automation and manual QA testing services to ensure robust, secure, and performant software.</textarea>
+                </div>
+                <div class="form-group">
+                    <label>Target Audience</label>
+                    <input type="text" class="form-control" value="Tech Companies, Startups, Enterprise IT">
+                </div>
+                <button class="btn btn-success">Update Analysis</button>
+            </div>
+        </div>
+
+        <!-- AI Builder Workflow -->
+        <div class="view-panel" id="view-ai-workflow">
+            <div class="card">
+                <h3>AI Website Builder Checklist</h3>
+                <p class="text-muted" style="margin-bottom: 1.5rem;">Follow these 13 steps for building a website using AI.</p>
+                <ol style="line-height: 1.8; margin-bottom: 2rem;">
+                    <li><strong>Gather Requirements:</strong> Define purpose, business details, target audience, branding, domain, pages, and features.</li>
+                    <li><strong>Prepare Content:</strong> Collect company info, services, products, images, videos, contact details, FAQs, testimonials.</li>
+                    <li><strong>Choose an AI Website Builder:</strong> Select from options like Wix AI, Squarespace AI, Webflow AI, etc.</li>
+                    <li><strong>Provide AI Prompts:</strong> Give detailed instructions to generate the website structure and design.</li>
+                    <li><strong>AI Generates Website:</strong> It creates homepage, navigation, layout, images, footer, and responsive design.</li>
+                    <li><strong>Review:</strong> Check branding, content, images, layout, responsiveness.</li>
+                    <li><strong>Customize:</strong> Adjust colors, fonts, logo, images, text, buttons, sections, animations.</li>
+                    <li><strong>Add Features:</strong> Incorporate e-commerce, blogs, chat, booking, memberships, payment options, user accounts.</li>
+                    <li><strong>Optimize for SEO:</strong> Add meta tags, keywords, alt text, sitemap, clean URLs.</li>
+                    <li><strong>Test:</strong> Verify links, forms, responsiveness, browser compatibility, speed, accessibility.</li>
+                    <li><strong>Connect Domain:</strong> Set up domain registration, DNS, SSL, hosting.</li>
+                    <li><strong>Publish:</strong> Final review and go live, ensuring the site is accessible.</li>
+                    <li><strong>Maintain:</strong> Regular updates, content additions, fixing issues, backups, analytics monitoring, SEO, security, performance improvements.</li>
+                </ol>
+                <button class="btn btn-success" onclick="alert('Workflow progress saved!')">Save Progress</button>
+            </div>
+        </div>
+
+        <!-- 2 & 3. Page Management & Content -->
+        <div class="view-panel" id="view-pages">
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3 style="margin: 0; border: none;">HTML Page Editor</h3>
+                    <button class="btn btn-primary" onclick="addNewPage()">+ Add New Page</button>
+                </div>
+                <ul id="pageList"></ul>
+                
+                <textarea id="htmlEditor" class="code-editor" disabled placeholder="Select a page to edit its HTML content directly..."></textarea>
+                
+                <div style="margin-top: 1rem; display: flex; gap: 1rem;">
+                    <button class="btn btn-success" onclick="savePageToBrowser()">💾 Save & Preview in Browser</button>
+                    <button class="btn btn-primary" onclick="downloadPage()">⬇️ Download HTML File</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4 & 14. Header & Navigation -->
+        <div class="view-panel" id="view-header">
+            <div class="card">
+                <h3>Navigation Customization</h3>
+                <p class="text-muted">Manage your top menu links and dropdowns.</p>
+                <div class="form-group">
+                    <label>Menu Items (JSON Format)</label>
+                    <textarea class="form-control" rows="5">[{"label":"Home","url":"index.html"},{"label":"Services","url":"services.html"},{"label":"Contact Us","url":"contact.html"}]</textarea>
+                </div>
+                <button class="btn btn-success">Update Navigation</button>
+            </div>
+        </div>
+
+        <!-- 5. Logo Customization -->
+        <div class="view-panel" id="view-logo">
+            <div class="card">
+                <h3>Brand Logo & Favicon</h3>
+                <div class="form-group">
+                    <label>Logo Image URL</label>
+                    <input type="text" class="form-control" value="logo.png">
+                </div>
+                <div class="form-group">
+                    <label>Logo Max Height (px)</label>
+                    <input type="number" class="form-control" value="40">
+                </div>
+                <button class="btn btn-success">Apply Branding</button>
+            </div>
+        </div>
+
+        <!-- 6 & 7. Theme & Colors -->
+        <div class="view-panel" id="view-theme">
+            <div class="card">
+                <h3>Color Scheme Customization</h3>
+                <p>Changes here simulate updates to <code>style.css</code> CSS variables.</p>
+                <div class="form-group">
+                    <label>Primary Brand Color</label>
+                    <input type="color" class="form-control" style="height: 50px;" value="#3b82f6">
+                </div>
+                <div class="form-group">
+                    <label>Background Color (Dark Mode)</label>
+                    <input type="color" class="form-control" style="height: 50px;" value="#0a0e17">
+                </div>
+                <div class="form-group">
+                    <label>Text Color</label>
+                    <input type="color" class="form-control" style="height: 50px;" value="#f8fafc">
+                </div>
+                <button class="btn btn-success" onclick="alert('Colors saved to theme config.')">Apply Theme</button>
+            </div>
+        </div>
+
+        <!-- 8. Fonts -->
+        <div class="view-panel" id="view-fonts">
+            <div class="card">
+                <h3>Typography Settings</h3>
+                <div class="form-group">
+                    <label>Heading Font Family</label>
+                    <select class="form-control">
+                        <option selected>'Outfit', sans-serif</option>
+                        <option>'Montserrat', sans-serif</option>
+                        <option>'Roboto', sans-serif</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Body Font Size (px)</label>
+                    <input type="number" class="form-control" value="16">
+                </div>
+                <button class="btn btn-success">Update Typography</button>
+            </div>
+        </div>
+        
+        <!-- Generic Placeholders for the remaining modules -->
+        <div class="view-panel" id="view-layout"><div class="card"><h3>Layout & Spacing</h3><p>Manage grid systems, hero section padding, and container widths.</p><button class="btn btn-success">Save Layout</button></div></div>
+        <div class="view-panel" id="view-media"><div class="card"><h3>Images & Media Library</h3><p>Upload and compress background images, galleries, and videos.</p><button class="btn btn-primary">Open Media Manager</button></div></div>
+        <div class="view-panel" id="view-forms"><div class="card"><h3>Form Builder</h3><p>Configure Contact, Login, and Quote forms. Currently using FormSubmit.</p><button class="btn btn-success">Save Forms</button></div></div>
+        <div class="view-panel" id="view-buttons"><div class="card"><h3>Button Customizer</h3><p>Adjust border radius, hover animations, and CTA sizing.</p><button class="btn btn-success">Save Buttons</button></div></div>
+        <div class="view-panel" id="view-footer"><div class="card"><h3>Footer Builder</h3><p>Edit copyright info, social links, and footer widget columns.</p><button class="btn btn-success">Save Footer</button></div></div>
+        <div class="view-panel" id="view-seo"><div class="card"><h3>SEO & Meta Settings</h3><p>Update Meta tags, alt text overrides, and sitemap generation rules.</p><button class="btn btn-success">Update SEO</button></div></div>
+        <div class="view-panel" id="view-performance"><div class="card"><h3>Performance Optimization</h3><p>Manage lazy loading, CSS minification, and browser caching rules.</p><button class="btn btn-success">Optimize Performance</button></div></div>
+        <div class="view-panel" id="view-security"><div class="card"><h3>Security Policies</h3><p>Configure SSL enforcement, Content Security Policies (CSP), and rate limiting.</p><button class="btn btn-success">Apply Security</button></div></div>
+        <div class="view-panel" id="view-integrations"><div class="card"><h3>Integrations & API</h3><p>Manage Google Analytics tags, Chatbots, and CRM webhooks.</p><button class="btn btn-success">Save Integrations</button></div></div>
+        <div class="view-panel" id="view-responsive"><div class="card"><h3>Responsive Design</h3><p>Configure breakpoints for Mobile, Tablet, and Desktop views.</p><button class="btn btn-success">Update Breakpoints</button></div></div>
+        <div class="view-panel" id="view-testing">
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="border: none; margin: 0;">Automated Testing & QA Scanner</h3>
+                    <button class="btn btn-primary" onclick="runScanner()" id="runScanBtn">Run Live Scan</button>
+                </div>
+                <p class="text-muted">Scans the live website (www.neobiumtech.in) for missing images, alt tags, and broken links.</p>
+                
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Date & Time</th>
+                            <th>Pages Scanned</th>
+                            <th>Status</th>
+                            <th>Errors</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scanHistoryBody">
+                        <!-- History injected here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- Authentication ---
+        if(localStorage.getItem('neobium_admin') !== 'true') {
+            window.location.href = 'admin-login.html';
+        }
+        function logout() {
+            localStorage.removeItem('neobium_admin');
+            window.location.href = 'admin-login.html';
+        }
+
+        // --- View Switching Logic ---
+        function switchView(viewId, navElement) {
+            // Update Navigation Highlighting
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            navElement.classList.add('active');
+            
+            // Update Title
+            document.getElementById('view-title').innerText = navElement.innerText;
+
+            // Switch Panels
+            document.querySelectorAll('.view-panel').forEach(el => el.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+        }
+
+        // --- Page Management Logic (Retained from previous build) ---
+        const defaultPages = ['index.html', 'services.html', 'contact.html'];
+        let pages = JSON.parse(localStorage.getItem('cms_pages')) || defaultPages;
+        let fileData = JSON.parse(localStorage.getItem('cms_file_data')) || {};
+        let currentEditingFile = null;
+
+        const pageListEl = document.getElementById('pageList');
+        const editorEl = document.getElementById('htmlEditor');
+
+        async function initPages() {
+            for(let p of defaultPages) {
+                if(!fileData[p]) {
+                    try {
+                        let res = await fetch(p);
+                        if(res.ok) fileData[p] = await res.text();
+                    } catch(e) { console.error("Could not fetch " + p); }
+                }
+            }
+            saveState();
+            renderPageList();
+        }
+
+        function saveState() {
+            localStorage.setItem('cms_pages', JSON.stringify(pages));
+            localStorage.setItem('cms_file_data', JSON.stringify(fileData));
+        }
+
+        function renderPageList() {
+            pageListEl.innerHTML = '';
+            pages.forEach(page => {
+                const li = document.createElement('li');
+                if(page === currentEditingFile) li.classList.add('active');
+                
+                const span = document.createElement('span');
+                span.innerText = page;
+                span.onclick = () => loadFile(page);
+                li.appendChild(span);
+
+                if(!defaultPages.includes(page)) {
+                    const delBtn = document.createElement('button');
+                    delBtn.className = 'del-page';
+                    delBtn.innerText = '×';
+                    delBtn.title = 'Delete Page';
+                    delBtn.onclick = (e) => { e.stopPropagation(); deletePage(page); };
+                    li.appendChild(delBtn);
+                }
+                pageListEl.appendChild(li);
+            });
+        }
+
+        function loadFile(filename) {
+            currentEditingFile = filename;
+            editorEl.value = fileData[filename] || '';
+            editorEl.disabled = false;
+            renderPageList();
+        }
+
+        function addNewPage() {
+            const name = prompt("Enter new page filename (e.g., about.html):");
+            if(name && name.endsWith('.html') && !pages.includes(name)) {
+                pages.push(name);
+                fileData[name] = `<!DOCTYPE html>\n<html lang="en">\n<head>\n<title>${name}</title>\n</head>\n<body>\n\n</body>\n</html>`;
+                saveState();
+                loadFile(name);
+            } else if (name) {
+                alert("Invalid or duplicate filename. Must end in .html");
+            }
+        }
+
+        function deletePage(filename) {
+            if(confirm("Are you sure you want to delete " + filename + "?")) {
+                pages = pages.filter(p => p !== filename);
+                delete fileData[filename];
+                saveState();
+                if(currentEditingFile === filename) {
+                    currentEditingFile = null;
+                    editorEl.value = '';
+                    editorEl.disabled = true;
+                }
+                renderPageList();
+            }
+        }
+
+        function savePageToBrowser() {
+            if(!currentEditingFile) return;
+            fileData[currentEditingFile] = editorEl.value;
+            saveState();
+            alert("Changes saved to your browser preview!");
+        }
+
+        function downloadPage() {
+            if(!currentEditingFile) return;
+            savePageToBrowser();
+            const blob = new Blob([fileData[currentEditingFile]], { type: 'text/html' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = currentEditingFile;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        initPages();
+
+        // --- Testing & QA Scanner Logic ---
+        let scanHistory = JSON.parse(localStorage.getItem('cms_scan_history')) || [];
+
+        function renderHistory() {
+            const tbody = document.getElementById('scanHistoryBody');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+            if(scanHistory.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--text-muted);">No previous scans found.</td></tr>';
+                return;
+            }
+            // Reverse so newest is top
+            [...scanHistory].reverse().forEach((scan, index) => {
+                const tr = document.createElement('tr');
+                tr.onclick = () => showModal(scanHistory.length - 1 - index);
+                
+                const statusBadge = scan.errors.length > 0 
+                    ? '<span class="badge badge-danger">Failed</span>'
+                    : '<span class="badge badge-success">Passed</span>';
+                
+                tr.innerHTML = `
+                    <td>${scan.date}</td>
+                    <td>${scan.pagesScanned}</td>
+                    <td>${statusBadge}</td>
+                    <td>${scan.errors.length} Issues</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function checkUrlLive(url) {
+            try {
+                if(url.startsWith('mailto:') || url.startsWith('tel:')) return true;
+                if(url === '#' || url === '') return false;
+                
+                // If it's a relative URL, make it absolute for live checking
+                if(!url.startsWith('http')) {
+                    if(url.startsWith('/')) url = 'https://www.neobiumtech.in' + url;
+                    else url = 'https://www.neobiumtech.in/' + url;
+                }
+
+                // Check via proxy
+                const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
+                const res = await fetch(proxyUrl, { method: 'HEAD' }); // Trying HEAD first, fallback to GET if needed
+                if(!res.ok) {
+                    const fallback = await fetch(proxyUrl);
+                    return fallback.ok;
+                }
+                return res.ok;
+            } catch(e) {
+                return false; 
+            }
+        }
+
+        async function runScanner() {
+            const btn = document.getElementById('runScanBtn');
+            btn.innerText = 'Scanning live site...';
+            btn.disabled = true;
+
+            const errors = [];
+            const pagesToScan = ['index.html', 'services.html', 'contact.html'];
+            
+            for(let filename of pagesToScan) {
+                try {
+                    const targetUrl = 'https://www.neobiumtech.in/' + filename;
+                    const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(targetUrl);
+                    
+                    const res = await fetch(proxyUrl);
+                    if(!res.ok) {
+                        errors.push(`[Live ${filename}] Could not reach page (404).`);
+                        continue;
+                    }
+                    const html = await res.text();
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+
+                    // Check Images
+                    const images = doc.querySelectorAll('img');
+                    for(let i=0; i<images.length; i++) {
+                        const img = images[i];
+                        const src = img.getAttribute('src');
+                        if(!src) {
+                            errors.push(`[Live ${filename}] Image #${i+1} is missing a 'src' attribute.`);
+                        } else {
+                            const exists = await checkUrlLive(src);
+                            if(!exists) errors.push(`[Live ${filename}] Image '${src}' is broken or missing on live site.`);
+                            if(!img.getAttribute('alt')) errors.push(`[Live ${filename}] Image '${src}' is missing an 'alt' tag (Accessibility).`);
+                        }
+                    }
+
+                    // Check Links
+                    const links = doc.querySelectorAll('a');
+                    for(let i=0; i<links.length; i++) {
+                        const a = links[i];
+                        const href = a.getAttribute('href');
+                        if(!href || href === '#' || href === '') {
+                            errors.push(`[Live ${filename}] Link '${a.innerText.trim() || 'Empty'}' has a missing or empty 'href' (Broken Link).`);
+                        } else {
+                            const exists = await checkUrlLive(href);
+                            if(!exists) errors.push(`[Live ${filename}] Link '${href}' is broken (404 Not Found) on live site.`);
+                        }
+                    }
+                } catch(e) {
+                    errors.push(`[Live ${filename}] Proxy Error: Could not verify page.`);
+                }
+            }
+
+            const scanResult = {
+                date: new Date().toLocaleString() + ' (Live Site)',
+                pagesScanned: pagesToScan.length,
+                errors: errors
+            };
+
+            scanHistory.push(scanResult);
+            localStorage.setItem('cms_scan_history', JSON.stringify(scanHistory));
+            
+            renderHistory();
+            
+            btn.innerText = 'Run New Scan';
+            btn.disabled = false;
+            
+            // Auto show the latest scan
+            showModal(scanHistory.length - 1);
+        }
+
+        // Modal Logic
+        function showModal(index) {
+            const scan = scanHistory[index];
+            if(!scan) return;
+
+            document.getElementById('modalTitle').innerText = `Scan Results - ${scan.date}`;
+            
+            let html = `<h4>Scanned ${scan.pagesScanned} pages</h4>`;
+            if(scan.errors.length === 0) {
+                html += `<div style="padding:1rem; background:var(--bg-dark); color:#6ee7b7; border-radius:6px;">✅ No accessibility or broken link issues found! Great job.</div>`;
+            } else {
+                html += `<ul style="color:#fca5a5; background:var(--bg-dark); padding:1rem 2rem; border-radius:6px; line-height:1.6; max-height:400px; overflow-y:auto;">`;
+                scan.errors.forEach(err => {
+                    html += `<li>${err}</li>`;
+                });
+                html += `</ul>`;
+            }
+
+            document.getElementById('modalBody').innerHTML = html;
+            document.getElementById('scanModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('scanModal').classList.remove('active');
+        }
+
+        // Initialize history on load (Wait for DOM)
+        document.addEventListener('DOMContentLoaded', renderHistory);
+    </script>
+    
+    <!-- Modal for Scan Results -->
+    <div class="modal-overlay" id="scanModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Scan Results</h3>
+                <button class="close-modal" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Details injected here -->
+            </div>
+        </div>
+    </div>
+</body>
+</html>
