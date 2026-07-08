@@ -8,6 +8,24 @@
     --text-muted: #A8DADC;
     --font-main: 'Outfit', sans-serif;
     --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    --bg-card: var(--surface-color);
+    --header-bg: rgba(5, 5, 5, 0.9);
+    --border-color: rgba(255, 255, 255, 0.1);
+    --border-color-light: rgba(255, 255, 255, 0.05);
+}
+
+:root[data-theme="light"] {
+    --bg-color: #F8F9FA;
+    --surface-color: #FFFFFF;
+    --surface-color-light: #F1F3F5;
+    --primary-red: #E63946;
+    --primary-red-hover: #D62828;
+    --text-main: #212529;
+    --text-muted: #495057;
+    --bg-card: var(--surface-color);
+    --header-bg: rgba(255, 255, 255, 0.9);
+    --border-color: rgba(0, 0, 0, 0.1);
+    --border-color-light: rgba(0, 0, 0, 0.05);
 }
 
 * {
@@ -18,6 +36,7 @@
 
 html {
     scroll-behavior: smooth;
+    font-size: var(--base-font-size, 16px);
 }
 
 body {
@@ -98,10 +117,10 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .header.scrolled {
-    background: rgba(5, 5, 5, 0.9);
+    background: var(--header-bg);
     backdrop-filter: blur(10px);
     padding: 1rem 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid var(--border-color-light);
 }
 
 .header-container {
@@ -111,7 +130,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .logo img {
-    height: 40px;
+    height: 80px;
 }
 
 .nav-list {
@@ -277,7 +296,7 @@ h1, h2, h3, h4, h5, h6 {
     background: var(--surface-color);
     padding: 2.5rem;
     border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color-light);
     transition: var(--transition);
     position: relative;
     overflow: hidden;
@@ -451,7 +470,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .footer-logo {
-    height: 40px;
+    height: 80px;
 }
 
 .footer h4 {
@@ -520,7 +539,7 @@ h1, h2, h3, h4, h5, h6 {
     background: var(--surface-color);
     padding: 3rem;
     border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color-light);
     box-shadow: 0 10px 30px rgba(0,0,0,0.3);
 }
 
@@ -539,7 +558,7 @@ h1, h2, h3, h4, h5, h6 {
     width: 100%;
     padding: 1rem;
     background: var(--surface-color-light);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border-color);
     border-radius: 6px;
     color: var(--text-main);
     font-family: var(--font-main);
@@ -563,7 +582,7 @@ textarea.form-control {
     padding-bottom: 60px;
     text-align: center;
     background: linear-gradient(180deg, rgba(230,57,70,0.1) 0%, var(--bg-color) 100%);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid var(--border-color-light);
 }
 
 .page-title {
@@ -675,4 +694,54 @@ textarea.form-control {
     background: radial-gradient(circle, rgba(255, 30, 30, 0.4) 0%, rgba(255, 10, 10, 0.15) 40%, rgba(255, 0, 0, 0) 70%);
     mix-blend-mode: screen;
     transition: top 0.2s cubic-bezier(0.25, 1, 0.5, 1), left 0.2s cubic-bezier(0.25, 1, 0.5, 1), width 0.3s, height 0.3s;
+}
+
+/* Settings Page */
+.settings-container {
+    max-width: 800px;
+    margin: 4rem auto;
+    padding: 3rem;
+    background-color: var(--bg-card);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.settings-group {
+    margin-bottom: 2.5rem;
+}
+
+.settings-group h3 {
+    margin-bottom: 1rem;
+    color: var(--primary-red);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+}
+
+.settings-options {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.setting-btn {
+    background-color: var(--surface-color-light);
+    color: var(--text-main);
+    border: 2px solid transparent;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: var(--transition);
+    flex: 1;
+    min-width: 150px;
+    text-align: center;
+}
+
+.setting-btn:hover {
+    background-color: rgba(230, 57, 70, 0.1);
+}
+
+.setting-btn.active {
+    border-color: var(--primary-red);
+    background-color: rgba(230, 57, 70, 0.05);
 }

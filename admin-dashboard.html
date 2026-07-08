@@ -552,11 +552,10 @@
                     else url = 'https://www.neobiumtech.in/' + url;
                 }
 
-                // Check via proxy
-                const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
-                const res = await fetch(proxyUrl, { method: 'HEAD' }); // Trying HEAD first, fallback to GET if needed
+                // Check directly
+                const res = await fetch(url, { method: 'HEAD' }); // Trying HEAD first, fallback to GET if needed
                 if(!res.ok) {
-                    const fallback = await fetch(proxyUrl);
+                    const fallback = await fetch(url);
                     return fallback.ok;
                 }
                 return res.ok;
@@ -576,9 +575,8 @@
             for(let filename of pagesToScan) {
                 try {
                     const targetUrl = 'https://www.neobiumtech.in/' + filename;
-                    const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(targetUrl);
                     
-                    const res = await fetch(proxyUrl);
+                    const res = await fetch(targetUrl);
                     if(!res.ok) {
                         errors.push(`[Live ${filename}] Could not reach page (404).`);
                         continue;
@@ -614,7 +612,7 @@
                         }
                     }
                 } catch(e) {
-                    errors.push(`[Live ${filename}] Proxy Error: Could not verify page.`);
+                    errors.push(`[Live ${filename}] Network Error: Could not verify page.`);
                 }
             }
 

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Neobium Tech</title>
+    <meta name="description" content="Customize your experience on Neobium Tech with theme and font size preferences.">
+    
+    <!-- Apply settings immediately -->
+    <script src="apply-settings.js"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    
+    <!-- Header -->
+    <header class="header" id="header">
+        <div class="container header-container">
+            <a href="index.html" class="logo">
+                <img src="logo.png" alt="Neobium Logo">
+            </a>
+            <nav class="nav">
+                <ul class="nav-list">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="services.html">Services</a></li>
+                    <li><a href="insights.html">Dev & QA Insights</a></li>
+                    <li><a href="contact.html">Contact Us</a></li>
+                    <li><a href="settings.html" style="color: var(--primary-red);">⚙️ Settings</a></li>
+                </ul>
+            </nav>
+            <button class="mobile-toggle" aria-label="Toggle navigation">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Page Header -->
+    <section class="page-header-section">
+        <div class="container">
+            <h1 class="page-title">Website <span class="highlight">Settings</span></h1>
+            <p class="page-desc">Customize your browsing experience. Changes made here apply instantly across the entire Neobium website.</p>
+        </div>
+    </section>
+
+    <!-- Settings Content -->
+    <section class="section">
+        <div class="container">
+            <div class="settings-container reveal">
+                
+                <div class="settings-group">
+                    <h3>Color Theme</h3>
+                    <div class="settings-options" id="theme-options">
+                        <button class="setting-btn" data-theme-value="dark">Dark Mode</button>
+                        <button class="setting-btn" data-theme-value="light">Light Mode</button>
+                    </div>
+                </div>
+
+                <div class="settings-group">
+                    <h3>Font Size</h3>
+                    <div class="settings-options" id="font-options">
+                        <button class="setting-btn" data-font-value="14px">Small</button>
+                        <button class="setting-btn" data-font-value="16px">Medium (Default)</button>
+                        <button class="setting-btn" data-font-value="18px">Large</button>
+                    </div>
+                </div>
+
+                <div style="margin-top: 3rem; text-align: center;">
+                    <a href="index.html" class="btn btn-primary">Return to Home</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-about">
+                    <img src="logo.png" alt="Neobium Logo" style="height: 40px; margin-bottom: 1rem;">
+                    <p>Elevating software quality through precision testing and innovative development solutions.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="services.html">Services</a></li>
+                        <li><a href="insights.html">Dev & QA Insights</a></li>
+                        <li><a href="contact.html">Contact Us</a></li>
+                        <li><a href="settings.html">Settings</a></li>
+                    </ul>
+                </div>
+                <div class="footer-contact">
+                    <h4>Contact Us</h4>
+                    <p>Email: contact@neobiumtech.in</p>
+                    <p>Phone: +91 9960604898</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Neobium Tech. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Theme Setting
+            const themeBtns = document.querySelectorAll('#theme-options .setting-btn');
+            const currentTheme = localStorage.getItem('neobium-theme') || 'dark';
+            
+            themeBtns.forEach(btn => {
+                if (btn.dataset.themeValue === currentTheme) {
+                    btn.classList.add('active');
+                }
+                
+                btn.addEventListener('click', () => {
+                    const theme = btn.dataset.themeValue;
+                    
+                    // Update UI
+                    themeBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    // Apply & Save
+                    document.documentElement.setAttribute('data-theme', theme);
+                    localStorage.setItem('neobium-theme', theme);
+                });
+            });
+
+            // Font Size Setting
+            const fontBtns = document.querySelectorAll('#font-options .setting-btn');
+            const currentFont = localStorage.getItem('neobium-font-size') || '16px';
+            
+            fontBtns.forEach(btn => {
+                if (btn.dataset.fontValue === currentFont) {
+                    btn.classList.add('active');
+                }
+                
+                btn.addEventListener('click', () => {
+                    const size = btn.dataset.fontValue;
+                    
+                    // Update UI
+                    fontBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    // Apply & Save
+                    document.documentElement.style.setProperty('--base-font-size', size);
+                    localStorage.setItem('neobium-font-size', size);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

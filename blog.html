@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog - Neobium Insights</title>
+    <meta name="description" content="Read our latest insights on software development and quality assurance.">
+    
+    <!-- Apply settings immediately -->
+    <script src="apply-settings.js"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .blog-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+            background-color: var(--bg-card);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            margin-top: 150px;
+            margin-bottom: 4rem;
+        }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: color 0.2s;
+        }
+        .back-link:hover {
+            color: var(--text-main);
+        }
+        .blog-header {
+            margin-bottom: 3rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 2rem;
+        }
+        .blog-header .category {
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+        .blog-header h1 {
+            font-size: 2.5rem;
+            color: var(--text-main);
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+        .blog-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: var(--text-muted);
+        }
+        .blog-content h3 {
+            color: var(--text-main);
+            font-size: 1.8rem;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        .blog-content h4 {
+            color: #cbd5e1;
+            font-size: 1.4rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .blog-content p {
+            margin-bottom: 1.5rem;
+        }
+        .blog-content ul, .blog-content ol {
+            margin-bottom: 1.5rem;
+            padding-left: 1.5rem;
+        }
+        .blog-content li {
+            margin-bottom: 0.5rem;
+        }
+        .blog-content code {
+            background-color: rgba(255,255,255,0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: monospace;
+            color: #f1f5f9;
+        }
+        #not-found {
+            text-align: center;
+            padding: 5rem 0;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- Header -->
+    <header class="header" id="header">
+        <div class="container header-container">
+            <a href="index.html" class="logo">
+                <img src="logo.png" alt="Neobium Logo">
+            </a>
+            <nav class="nav">
+                <ul class="nav-list">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="services.html">Services</a></li>
+                    <li><a href="insights.html" style="color: var(--primary-red);">Dev & QA Insights</a></li>
+                    <li><a href="settings.html">⚙️ Settings</a></li>
+                    <li><a href="contact.html" class="btn btn-primary">Contact Us</a></li>
+                </ul>
+            </nav>
+            <button class="mobile-toggle" aria-label="Toggle navigation">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="blog-container" id="blog-content-wrapper">
+            <a href="insights.html" class="back-link">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                Back to Dev & QA Insights
+            </a>
+            
+            <div id="blog-body">
+                <!-- Blog content injected here -->
+            </div>
+        </div>
+
+        <div id="not-found">
+            <h2>Blog post not found</h2>
+            <p>The article you are looking for does not exist or has been removed.</p>
+            <a href="insights.html" class="btn btn-primary" style="margin-top: 2rem;">Return to Dev & QA Insights</a>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer" id="contact">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <img src="logo.png" alt="Neobium Logo" class="footer-logo">
+                    <p>Nourishing Tomorrow's Software Quality with state-of-the-art testing solutions.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="services.html">Services</a></li>
+                        <li><a href="insights.html">Dev & QA Insights</a></li>
+                        <li><a href="contact.html">Contact Us</a></li>
+                        <li><a href="settings.html">Settings</a></li>
+                    </ul>
+                </div>
+                <div class="footer-contact">
+                    <h4>Contact Us</h4>
+                    <p>Email: contact@neobiumtech.in</p>
+                    <p>Phone: +91 9960604898</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Neobium Tech. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="main.js"></script>
+    <script src="blogs-data.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const blogId = urlParams.get('id');
+            const blogWrapper = document.getElementById('blog-content-wrapper');
+            const notFound = document.getElementById('not-found');
+            const blogBody = document.getElementById('blog-body');
+            
+            if (blogId && typeof blogs !== 'undefined') {
+                const blog = blogs.find(b => b.id === blogId);
+                
+                if (blog) {
+                    document.title = `${blog.title} - Neobium Insights`;
+                    blogBody.innerHTML = `
+                        <div class="blog-header">
+                            <span class="category">${blog.category}</span>
+                            <h1>${blog.title}</h1>
+                        </div>
+                        <div class="blog-content">
+                            ${blog.content}
+                        </div>
+                    `;
+                } else {
+                    blogWrapper.style.display = 'none';
+                    notFound.style.display = 'block';
+                }
+            } else {
+                blogWrapper.style.display = 'none';
+                notFound.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
