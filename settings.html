@@ -196,70 +196,96 @@
             // Font Family Setting (Dynamically loaded)
             const fontFamilyOptions = document.getElementById('font-family-options');
             const currentFont = localStorage.getItem('neobium-font') || 'Outfit';
-            
+                      const addFontBtn = (font, type) => {
+                if (font.enabled === false) return; // Allow if enabled is true or undefined
+                
+                // Dynamically load the font for previewing in the button if it's not Outfit
+                if (type === 'custom' && font.url) {
+                    const style = document.createElement('style');
+                    style.innerHTML = `@font-face { font-family: '${font.name}'; src: url('${font.url}'); font-display: swap; }`;
+                    document.head.appendChild(style);
+                } else if (type === 'google' && font.name !== 'Outfit') {
+                    if (!document.querySelector(`link[href*="${font.name.replace(/ /g, '+')}"]`)) {
+                        const link = document.createElement('link');
+                        link.href = `https://fonts.googleapis.com/css2?family=${font.name.replace(/ /g, '+')}:wght@400;700&display=swap`;
+                        link.rel = 'stylesheet';
+                        document.head.appendChild(link);
+                    }
+                }
+
+                const btn = document.createElement('button');
+                btn.className = `setting-btn ${currentFont === font.name ? 'active' : ''}`;
+                btn.style.fontFamily = `'${font.name}', sans-serif`;
+                btn.innerText = font.name;
+                
+                btn.addEventListener('click', () => {
+                    // Update UI
+                    document.querySelectorAll('#font-family-options .setting-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    // Save state
+                    localStorage.setItem('neobium-font', font.name);
+                    localStorage.setItem('neobium-font-type', type);
+                    if (type === 'custom') localStorage.setItem('neobium-font-url', font.url);
+                    else localStorage.removeItem('neobium-font-url');
+                    
+                    // Apply immediately for Settings UI
+                    document.documentElement.setAttribute('data-font', font.name);
+                    document.body.style.setProperty('font-family', `'${font.name}', sans-serif`, 'important');
+                });
+                fontFamilyOptions.appendChild(btn);
+            };
+
+            const loadDefaultFonts = () => {
+                addFontBtn({ name: 'Outfit', enabled: true }, 'google');
+                addFontBtn({ name: 'Roboto', enabled: true }, 'google');
+            };
+
             fetch('/api/fonts-config')
                 .then(res => res.json())
                 .then(data => {
                     fontFamilyOptions.innerHTML = '';
                     
-                    const addFontBtn = (font, type) => {
-                        if (!font.enabled) return;
-                        
-                        // Dynamically load the font for previewing in the button if it's not Outfit
-                        if (type === 'custom') {
-                            const style = document.createElement('style');
-                            style.innerHTML = \`@font-face { font-family: '\${font.name}'; src: url('\${font.url}'); font-display: swap; }\`;
-                            document.head.appendChild(style);
-                        } else if (type === 'google' && font.name !== 'Outfit') {
-                            if (!document.querySelector(\`link[href*="\${font.name.replace(/ /g, '+')}"]\`)) {
-                                const link = document.createElement('link');
-                                link.href = \`https://fonts.googleapis.com/css2?family=\${font.name.replace(/ /g, '+')}:wght@400;700&display=swap\`;
-                                link.rel = 'stylesheet';
-                                document.head.appendChild(link);
-                            }
-                        }
-
-                        const btn = document.createElement('button');
-                        btn.className = \`setting-btn \${currentFont === font.name ? 'active' : ''}\`;
-                        btn.style.fontFamily = \`'\${font.name}', sans-serif\`;
-                        btn.innerText = font.name;
-                        
-                        btn.addEventListener('click', () => {
-                            // Update UI
-                            document.querySelectorAll('#font-family-options .setting-btn').forEach(b => b.classList.remove('active'));
-                            btn.classList.add('active');
-                            
-                            // Save state
-                            localStorage.setItem('neobium-font', font.name);
-                            localStorage.setItem('neobium-font-type', type);
-                            if (type === 'custom') localStorage.setItem('neobium-font-url', font.url);
-                            else localStorage.removeItem('neobium-font-url');
-                            
-                            // Apply immediately for Settings UI
-                            document.documentElement.setAttribute('data-font', font.name);
-                            document.body.style.setProperty('font-family', \`'\${font.name}', sans-serif\`, 'important');
-                        });
-                        fontFamilyOptions.appendChild(btn);
-                    };
-
-                    if (data.googleFonts) data.googleFonts.forEach(f => addFontBtn(f, 'google'));
-                    if (data.customFonts) data.customFonts.forEach(f => addFontBtn(f, 'custom'));
+                    // Ensure defaults are there
+                    loadDefaultFonts();
                     
-                    if (fontFamilyOptions.innerHTML === '') {
-                        fontFamilyOptions.innerHTML = '<div style="font-size: 0.9rem; color: var(--text-muted); width: 100%; text-align: center;">No fonts configured by admin.</div>';
+                    // Track added fonts to avoid duplicates
+                    const addedFonts = ['Outfit', 'Roboto'];
+
+                    if (data.googleFonts) {
+                        data.googleFonts.forEach(f => {
+                            if (f.enabled !== false && !addedFonts.includes(f.name)) {
+                                addFontBtn(f, 'google');
+                                addedFonts.push(f.name);
+                            }
+                        });
+                    }
+                    if (data.customFonts) {
+                        data.customFonts.forEach(f => {
+                            if (f.enabled !== false && !addedFonts.includes(f.name)) {
+                                addFontBtn(f, 'custom');
+                                addedFonts.push(f.name);
+                            }
+                        });
                     }
                 })
                 .catch(err => {
                     console.error('Failed to load fonts API', err);
-                    fontFamilyOptions.innerHTML = '<div style="font-size: 0.9rem; color: var(--danger); width: 100%; text-align: center;">Failed to load fonts.</div>';
-                });
+                    fontFamilyOptions.innerHTML = '';
+                    loadDefaultFonts();
+                    
+                    const errorMsg = document.createElement('div');
+                    errorMsg.style = 'font-size: 0.9rem; color: var(--danger); width: 100%; text-align: center; margin-top: 10px;';
+                    errorMsg.innerText = 'Could not load additional fonts from admin.';
+                    fontFamilyOptions.appendChild(errorMsg);
+                }); 
 
             // Font Size Setting
             const fontBtns = document.querySelectorAll('#font-options .setting-btn');
-            const currentFont = localStorage.getItem('neobium-font-size') || '16px';
+            const currentFontSize = localStorage.getItem('neobium-font-size') || '16px';
             
             fontBtns.forEach(btn => {
-                if (btn.dataset.fontValue === currentFont) {
+                if (btn.dataset.fontValue === currentFontSize) {
                     btn.classList.add('active');
                 }
                 

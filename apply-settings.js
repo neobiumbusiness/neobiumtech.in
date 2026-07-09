@@ -32,15 +32,15 @@
         document.head.appendChild(style);
     } else {
         const link = document.createElement('link');
-        link.href = \`https://fonts.googleapis.com/css2?family=\${savedFont.replace(/ /g, '+')}:wght@300;400;500;700;900&display=swap\`;
+        link.href = `https://fonts.googleapis.com/css2?family=${savedFont.replace(/ /g, '+')}:wght@300;400;500;700;900&display=swap`;
         link.rel = 'stylesheet';
         document.head.appendChild(link);
         
         const style = document.createElement('style');
-        style.innerHTML = \`
-            body { font-family: '\${savedFont}', sans-serif !important; }
-            :root { --font-main: '\${savedFont}', sans-serif !important; }
-        \`;
+        style.innerHTML = `
+            body { font-family: '${savedFont}', sans-serif !important; }
+            :root { --font-main: '${savedFont}', sans-serif !important; }
+        `;
         document.head.appendChild(style);
     }
     
