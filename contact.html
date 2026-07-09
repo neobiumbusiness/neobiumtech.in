@@ -94,11 +94,18 @@
                             <label for="service">Service of Interest</label>
                             <select name="service" id="service" class="form-control" required>
                                 <option value="">Select a service...</option>
-                                <option value="automation">Automation Testing</option>
-                                <option value="manual">Manual Testing</option>
-                                <option value="performance">Performance Testing</option>
-                                <option value="security">Security Testing</option>
-                                <option value="api">API Testing</option>
+                                <optgroup label="Development Services">
+                                    <option value="web-dev">Web Development</option>
+                                    <option value="mobile-dev">Mobile App Development</option>
+                                    <option value="custom-software">Custom Software Development</option>
+                                </optgroup>
+                                <optgroup label="Quality Assurance Services">
+                                    <option value="automation">Automation Testing</option>
+                                    <option value="manual">Manual Testing</option>
+                                    <option value="performance">Performance Testing</option>
+                                    <option value="security">Security Testing</option>
+                                    <option value="api">API Testing</option>
+                                </optgroup>
                                 <option value="other">Other</option>
                             </select>
                         </div>

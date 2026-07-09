@@ -29,8 +29,8 @@
                     <li><a href="index.html">Home</a></li>
                     <li><a href="services.html">Services</a></li>
                     <li><a href="insights.html">Dev & QA Insights</a></li>
-                    <li><a href="contact.html">Contact Us</a></li>
-                    <li><a href="settings.html" style="color: var(--primary-red);">⚙️ Settings</a></li>
+                    <li><a href="settings.html" style="color: var(--primary-color);">⚙️ Settings</a></li>
+                    <li><a href="contact.html" class="btn btn-primary">Contact Us</a></li>
                 </ul>
             </nav>
             <button class="mobile-toggle" aria-label="Toggle navigation">
@@ -57,8 +57,29 @@
                 <div class="settings-group">
                     <h3>Color Theme</h3>
                     <div class="settings-options" id="theme-options">
-                        <button class="setting-btn" data-theme-value="dark">Dark Mode</button>
                         <button class="setting-btn" data-theme-value="light">Light Mode</button>
+                        <button class="setting-btn" data-theme-value="dark">Dark Mode</button>
+                    </div>
+                </div>
+
+                <div class="settings-group">
+                    <h3>Color Scheme</h3>
+                    <div class="settings-options" id="color-options">
+                        <button class="setting-btn" data-color-value="red" style="border-bottom: 4px solid #E63946;">Red</button>
+                        <button class="setting-btn" data-color-value="blue" style="border-bottom: 4px solid #2a6fdb;">Blue</button>
+                        <button class="setting-btn" data-color-value="green" style="border-bottom: 4px solid #28a745;">Green</button>
+                        <button class="setting-btn" data-color-value="purple" style="border-bottom: 4px solid #6f42c1;">Purple</button>
+                        <button class="setting-btn" data-color-value="orange" style="border-bottom: 4px solid #fd7e14;">Orange</button>
+                        <button class="setting-btn" data-color-value="cyan" style="border-bottom: 4px solid #17a2b8;">Cyan</button>
+                        <button class="setting-btn" data-color-value="pink" style="border-bottom: 4px solid #e83e8c;">Pink</button>
+                    </div>
+                </div>
+
+                <div class="settings-group">
+                    <h3>Font Family</h3>
+                    <div class="settings-options" id="font-family-options">
+                        <!-- Font options will be dynamically injected here via JavaScript based on admin configuration -->
+                        <div style="font-size: 0.9rem; color: var(--text-muted); width: 100%; text-align: center;">Loading fonts...</div>
                     </div>
                 </div>
 
@@ -71,9 +92,9 @@
                     </div>
                 </div>
 
-                <div style="margin-top: 3rem; text-align: center;">
-                    <a href="index.html" class="btn btn-primary">Return to Home</a>
-                </div>
+            </div>
+            <div style="margin-top: 3rem; text-align: center;">
+                <a href="index.html" class="btn btn-primary btn-lg">Return to Home</a>
             </div>
         </div>
     </section>
@@ -113,7 +134,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             // Theme Setting
             const themeBtns = document.querySelectorAll('#theme-options .setting-btn');
-            const currentTheme = localStorage.getItem('neobium-theme') || 'dark';
+            const currentTheme = localStorage.getItem('neobium-theme') || 'light';
             
             themeBtns.forEach(btn => {
                 if (btn.dataset.themeValue === currentTheme) {
@@ -130,8 +151,108 @@
                     // Apply & Save
                     document.documentElement.setAttribute('data-theme', theme);
                     localStorage.setItem('neobium-theme', theme);
+
+                    // Update Logos dynamically
+                    const logoSrc = theme === 'light' ? 'logo-light.png' : 'logo-dark.png';
+                    document.querySelectorAll('img[alt="Neobium Logo"]').forEach(img => {
+                        img.setAttribute('src', logoSrc);
+                        img.onerror = function() {
+                            this.onerror = null;
+                            this.src = 'logo.png';
+                        };
+                    });
                 });
             });
+
+            // Sync with global theme toggle
+            window.addEventListener('themeChanged', (e) => {
+                themeBtns.forEach(b => b.classList.remove('active'));
+                const activeBtn = document.querySelector(`.setting-btn[data-theme-value="${e.detail}"]`);
+                if (activeBtn) activeBtn.classList.add('active');
+            });
+
+            // Color Setting
+            const colorBtns = document.querySelectorAll('#color-options .setting-btn');
+            const currentColor = localStorage.getItem('neobium-color') || 'red';
+            
+            colorBtns.forEach(btn => {
+                if (btn.dataset.colorValue === currentColor) {
+                    btn.classList.add('active');
+                }
+                
+                btn.addEventListener('click', () => {
+                    const color = btn.dataset.colorValue;
+                    
+                    // Update UI
+                    colorBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    // Apply & Save
+                    document.documentElement.setAttribute('data-color', color);
+                    localStorage.setItem('neobium-color', color);
+                });
+            });
+
+            // Font Family Setting (Dynamically loaded)
+            const fontFamilyOptions = document.getElementById('font-family-options');
+            const currentFont = localStorage.getItem('neobium-font') || 'Outfit';
+            
+            fetch('/api/fonts-config')
+                .then(res => res.json())
+                .then(data => {
+                    fontFamilyOptions.innerHTML = '';
+                    
+                    const addFontBtn = (font, type) => {
+                        if (!font.enabled) return;
+                        
+                        // Dynamically load the font for previewing in the button if it's not Outfit
+                        if (type === 'custom') {
+                            const style = document.createElement('style');
+                            style.innerHTML = \`@font-face { font-family: '\${font.name}'; src: url('\${font.url}'); font-display: swap; }\`;
+                            document.head.appendChild(style);
+                        } else if (type === 'google' && font.name !== 'Outfit') {
+                            if (!document.querySelector(\`link[href*="\${font.name.replace(/ /g, '+')}"]\`)) {
+                                const link = document.createElement('link');
+                                link.href = \`https://fonts.googleapis.com/css2?family=\${font.name.replace(/ /g, '+')}:wght@400;700&display=swap\`;
+                                link.rel = 'stylesheet';
+                                document.head.appendChild(link);
+                            }
+                        }
+
+                        const btn = document.createElement('button');
+                        btn.className = \`setting-btn \${currentFont === font.name ? 'active' : ''}\`;
+                        btn.style.fontFamily = \`'\${font.name}', sans-serif\`;
+                        btn.innerText = font.name;
+                        
+                        btn.addEventListener('click', () => {
+                            // Update UI
+                            document.querySelectorAll('#font-family-options .setting-btn').forEach(b => b.classList.remove('active'));
+                            btn.classList.add('active');
+                            
+                            // Save state
+                            localStorage.setItem('neobium-font', font.name);
+                            localStorage.setItem('neobium-font-type', type);
+                            if (type === 'custom') localStorage.setItem('neobium-font-url', font.url);
+                            else localStorage.removeItem('neobium-font-url');
+                            
+                            // Apply immediately for Settings UI
+                            document.documentElement.setAttribute('data-font', font.name);
+                            document.body.style.setProperty('font-family', \`'\${font.name}', sans-serif\`, 'important');
+                        });
+                        fontFamilyOptions.appendChild(btn);
+                    };
+
+                    if (data.googleFonts) data.googleFonts.forEach(f => addFontBtn(f, 'google'));
+                    if (data.customFonts) data.customFonts.forEach(f => addFontBtn(f, 'custom'));
+                    
+                    if (fontFamilyOptions.innerHTML === '') {
+                        fontFamilyOptions.innerHTML = '<div style="font-size: 0.9rem; color: var(--text-muted); width: 100%; text-align: center;">No fonts configured by admin.</div>';
+                    }
+                })
+                .catch(err => {
+                    console.error('Failed to load fonts API', err);
+                    fontFamilyOptions.innerHTML = '<div style="font-size: 0.9rem; color: var(--danger); width: 100%; text-align: center;">Failed to load fonts.</div>';
+                });
 
             // Font Size Setting
             const fontBtns = document.querySelectorAll('#font-options .setting-btn');

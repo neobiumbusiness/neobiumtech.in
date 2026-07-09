@@ -291,17 +291,30 @@
 
         <!-- 5. Logo Customization -->
         <div class="view-panel" id="view-logo">
+            <div class="card" style="margin-bottom: 2rem;">
+                <h3>Light Theme Logo</h3>
+                <p class="text-muted" style="margin-bottom: 1rem;">Displayed when users select the Light Mode theme.</p>
+                <div style="margin-bottom: 1rem; background: #F8F9FA; padding: 1rem; border-radius: 8px; border: 1px solid var(--border); display: inline-block;">
+                    <img id="preview-logo-light" src="logo-light.png" onerror="this.src='logo.png'" alt="Light Theme Logo" style="max-height: 60px;">
+                </div>
+                <div class="form-group">
+                    <label>Upload New Logo</label>
+                    <input type="file" id="file-logo-light" class="form-control" accept="image/png, image/jpeg, image/svg+xml" onchange="previewLogo(this, 'preview-logo-light')">
+                </div>
+                <button class="btn btn-success" onclick="uploadLogo('light', 'file-logo-light')">Upload & Save Light Logo</button>
+            </div>
+
             <div class="card">
-                <h3>Brand Logo & Favicon</h3>
-                <div class="form-group">
-                    <label>Logo Image URL</label>
-                    <input type="text" class="form-control" value="logo.png">
+                <h3>Dark Theme Logo</h3>
+                <p class="text-muted" style="margin-bottom: 1rem;">Displayed when users select the Dark Mode theme.</p>
+                <div style="margin-bottom: 1rem; background: #050505; padding: 1rem; border-radius: 8px; border: 1px solid var(--border); display: inline-block;">
+                    <img id="preview-logo-dark" src="logo-dark.png" onerror="this.src='logo.png'" alt="Dark Theme Logo" style="max-height: 60px;">
                 </div>
                 <div class="form-group">
-                    <label>Logo Max Height (px)</label>
-                    <input type="number" class="form-control" value="40">
+                    <label>Upload New Logo</label>
+                    <input type="file" id="file-logo-dark" class="form-control" accept="image/png, image/jpeg, image/svg+xml" onchange="previewLogo(this, 'preview-logo-dark')">
                 </div>
-                <button class="btn btn-success">Apply Branding</button>
+                <button class="btn btn-success" onclick="uploadLogo('dark', 'file-logo-dark')">Upload & Save Dark Logo</button>
             </div>
         </div>
 
@@ -329,20 +342,50 @@
         <!-- 8. Fonts -->
         <div class="view-panel" id="view-fonts">
             <div class="card">
-                <h3>Typography Settings</h3>
-                <div class="form-group">
-                    <label>Heading Font Family</label>
-                    <select class="form-control">
-                        <option selected>'Outfit', sans-serif</option>
-                        <option>'Montserrat', sans-serif</option>
-                        <option>'Roboto', sans-serif</option>
+                <h3>Font Management</h3>
+                <p class="text-muted" style="margin-bottom: 2rem;">Select which fonts should be available for users to choose in the Settings page. You can also upload custom fonts.</p>
+                
+                <h4 style="margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">Google Fonts</h4>
+                
+                <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+                    <select id="google-font-select" class="form-control" style="flex: 1;">
+                        <option value="Outfit">Outfit</option>
+                        <option value="Roboto">Roboto</option>
+                        <option value="Open Sans">Open Sans</option>
+                        <option value="Lato">Lato</option>
+                        <option value="Montserrat">Montserrat</option>
+                        <option value="Poppins">Poppins</option>
+                        <option value="Inter">Inter</option>
+                        <option value="Playfair Display">Playfair Display</option>
+                        <option value="Nunito">Nunito</option>
+                        <option value="Raleway">Raleway</option>
+                        <option value="Ubuntu">Ubuntu</option>
+                        <option value="Oswald">Oswald</option>
+                        <option value="Merriweather">Merriweather</option>
+                        <option value="Fira Code">Fira Code</option>
                     </select>
+                    <button class="btn btn-primary" onclick="addGoogleFont()">Add Google Font</button>
                 </div>
-                <div class="form-group">
-                    <label>Body Font Size (px)</label>
-                    <input type="number" class="form-control" value="16">
+
+                <div id="admin-google-fonts-list" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
+                    <!-- Checkboxes injected via JS -->
                 </div>
-                <button class="btn btn-success">Update Typography</button>
+
+                <h4 style="margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">Custom Fonts</h4>
+                <div id="admin-custom-fonts-list" style="display: grid; grid-template-columns: 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                    <!-- Custom font checkboxes injected via JS -->
+                </div>
+
+                <div style="background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
+                    <h5 style="margin-top: 0; margin-bottom: 1rem;">Upload Custom Font</h5>
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <input type="file" id="custom-font-file" class="form-control" accept=".ttf,.woff,.woff2,.otf" style="flex: 1;">
+                        <button class="btn btn-primary" onclick="uploadCustomFont()">Upload Font</button>
+                    </div>
+                    <small class="text-muted" style="display: block; margin-top: 0.5rem;">Supported formats: .ttf, .woff, .woff2, .otf (Max 10MB)</small>
+                </div>
+
+                <button class="btn btn-success" onclick="saveFontsConfig()">Save Font Configuration</button>
             </div>
         </div>
         
@@ -390,7 +433,9 @@
         }
         function logout() {
             localStorage.removeItem('neobium_admin');
-            window.location.href = 'admin-login.html';
+            fetch('/api/logout', { method: 'POST' }).finally(() => {
+                window.location.href = 'index.html';
+            });
         }
 
         // --- View Switching Logic ---
@@ -660,6 +705,55 @@
             document.getElementById('scanModal').classList.remove('active');
         }
 
+        // Logo Upload Logic
+        function previewLogo(input, previewId) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById(previewId).src = e.target.result;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function uploadLogo(theme, inputId) {
+            const input = document.getElementById(inputId);
+            if (!input.files || !input.files[0]) {
+                alert('Please select an image file first.');
+                return;
+            }
+
+            const file = input.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const base64Data = e.target.result;
+                
+                fetch('/api/upload-logo', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        theme: theme,
+                        imageBase64: base64Data
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                    } else {
+                        alert('Error: ' + data.error);
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('An error occurred during upload.');
+                });
+            };
+            
+            reader.readAsDataURL(file);
+        }
+
         // Initialize history on load (Wait for DOM)
         document.addEventListener('DOMContentLoaded', renderHistory);
     </script>
@@ -676,5 +770,124 @@
             </div>
         </div>
     </div>
+    <script>
+        // --- Font Management Logic ---
+        let fontsConfig = { googleFonts: [], customFonts: [] };
+
+        async function loadFontsConfig() {
+            try {
+                const res = await fetch('/api/fonts-config');
+                fontsConfig = await res.json();
+                renderFontsConfig();
+            } catch (err) {
+                console.error('Failed to load fonts config', err);
+            }
+        }
+
+        function renderFontsConfig() {
+            const gList = document.getElementById('admin-google-fonts-list');
+            gList.innerHTML = '';
+            fontsConfig.googleFonts.forEach((font, idx) => {
+                gList.innerHTML += `
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                        <input type="checkbox" id="gfont-${idx}" ${font.enabled ? 'checked' : ''}>
+                        <span style="font-family: '${font.name}', sans-serif;">${font.name}</span>
+                    </label>
+                `;
+            });
+
+            const cList = document.getElementById('admin-custom-fonts-list');
+            cList.innerHTML = '';
+            if (fontsConfig.customFonts.length === 0) {
+                cList.innerHTML = '<p class="text-muted">No custom fonts uploaded yet.</p>';
+            } else {
+                fontsConfig.customFonts.forEach((font, idx) => {
+                    cList.innerHTML += `
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                            <input type="checkbox" id="cfont-${idx}" ${font.enabled ? 'checked' : ''}>
+                            <span>${font.name}</span>
+                        </label>
+                    `;
+                });
+            }
+        }
+
+        function addGoogleFont() {
+            const select = document.getElementById('google-font-select');
+            const fontName = select.value;
+            
+            const exists = fontsConfig.googleFonts.find(f => f.name === fontName);
+            if (!exists) {
+                fontsConfig.googleFonts.push({ name: fontName, enabled: true });
+                renderFontsConfig();
+            } else {
+                alert(fontName + ' is already in the list.');
+            }
+        }
+
+        async function saveFontsConfig() {
+            fontsConfig.googleFonts.forEach((font, idx) => {
+                font.enabled = document.getElementById(`gfont-${idx}`).checked;
+            });
+            fontsConfig.customFonts.forEach((font, idx) => {
+                font.enabled = document.getElementById(`cfont-${idx}`).checked;
+            });
+
+            try {
+                const res = await fetch('/api/fonts-config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(fontsConfig)
+                });
+                const result = await res.json();
+                if (result.success) {
+                    alert('Font configuration saved successfully!');
+                } else {
+                    alert('Failed to save font configuration.');
+                }
+            } catch (err) {
+                alert('Error saving font configuration.');
+            }
+        }
+
+        async function uploadCustomFont() {
+            const fileInput = document.getElementById('custom-font-file');
+            const file = fileInput.files[0];
+            if (!file) return alert('Please select a font file first.');
+            
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                const base64Data = e.target.result;
+                try {
+                    const res = await fetch('/api/upload-font', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ fileData: base64Data, fileName: file.name })
+                    });
+                    const result = await res.json();
+                    
+                    if (result.success) {
+                        const fontName = prompt('Enter a display name for this font:', result.fileName.split('.')[0]);
+                        fontsConfig.customFonts.push({
+                            name: fontName || result.fileName,
+                            url: result.fontUrl,
+                            enabled: true
+                        });
+                        renderFontsConfig();
+                        saveFontsConfig(); // Auto save
+                        fileInput.value = '';
+                    } else {
+                        alert(result.message || 'Upload failed.');
+                    }
+                } catch (err) {
+                    alert('An error occurred during upload.');
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Initialize fonts config
+        loadFontsConfig();
+    </script>
 </body>
 </html>
