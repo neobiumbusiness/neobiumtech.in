@@ -37,11 +37,13 @@ const isAuthenticated = (req, res, next) => {
 // Authentication Routes
 app.post('/api/login', (req, res) => {
     const { email, password } = req.body;
-    if (email === ADMIN_USER && password === ADMIN_PASS) {
+    if (email !== ADMIN_USER) {
+        res.status(401).json({ success: false, message: 'Email wrong' });
+    } else if (password !== ADMIN_PASS) {
+        res.status(401).json({ success: false, message: 'Password wrong' });
+    } else {
         req.session.loggedIn = true;
         res.json({ success: true });
-    } else {
-        res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
 });
 

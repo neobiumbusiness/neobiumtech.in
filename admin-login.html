@@ -100,10 +100,12 @@
                     localStorage.setItem('neobium_admin', 'true');
                     window.location.href = 'admin-dashboard.html';
                 } else {
+                    document.getElementById('errorMsg').innerText = data.message || 'Invalid email or password.';
                     document.getElementById('errorMsg').style.display = 'block';
                 }
             } catch (err) {
                 console.error("Login failed", err);
+                document.getElementById('errorMsg').innerText = 'An error occurred during login.';
                 document.getElementById('errorMsg').style.display = 'block';
             }
         });
