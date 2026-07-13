@@ -129,23 +129,68 @@
         </div>
     </footer>
 
+    <script src="github-cms.js"></script>
     <script src="main.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             function saveSiteSetting(key, value, extra = {}) {
                 const payload = { [key]: value, ...extra };
+                
+                // Fallback for Github Pages (no backend)
+                let localSettings = {};
+                try {
+                    localSettings = JSON.parse(localStorage.getItem('neobium-settings') || '{}');
+                } catch(e) {}
+                Object.assign(localSettings, payload);
+                localStorage.setItem('neobium-settings', JSON.stringify(localSettings));
+
+                // Always try to fetch current remote settings before pushing
+                let remoteSettings = { ...localSettings };
+                
                 fetch('/api/site-settings', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
-                }).catch(console.error);
+                }).then(async res => {
+                    if (!res.ok) throw new Error('API failed');
+                }).catch(async err => {
+                    if (window.githubCMS) {
+                        try {
+                            const res = await fetch('/site-settings.json');
+                            if (res.ok) remoteSettings = { ...(await res.json()), ...payload };
+                        } catch(e) {}
+                        
+                        const result = await window.githubCMS.pushFile(
+                            'site-settings.json',
+                            JSON.stringify(remoteSettings, null, 2),
+                            'CMS Update: Updated Site Settings'
+                        );
+                        if (result.success) console.log('Site settings saved to GitHub!');
+                        else if (result.error !== 'GitHub credentials not provided.') alert('Failed to save to GitHub: ' + result.error);
+                    }
+                });
             }
 
             let settings = { theme: 'light', color: 'red', font: 'Outfit', fontSize: '16px', fontType: 'google', fontUrl: '' };
+            
+            // Load from localStorage as fallback
             try {
-                const res = await fetch('/api/site-settings');
-                if (res.ok) settings = await res.json();
-            } catch(e) { console.error('Failed to load settings', e); }
+                const local = JSON.parse(localStorage.getItem('neobium-settings'));
+                if (local) settings = { ...settings, ...local };
+            } catch(e) {}
+
+            try {
+                let res = await fetch('/api/site-settings');
+                if (!res.ok) throw new Error('API failed');
+                settings = { ...settings, ...(await res.json()) };
+            } catch(e) {
+                try {
+                    let res = await fetch('/site-settings.json');
+                    if (res.ok) settings = { ...settings, ...(await res.json()) };
+                } catch (err) {
+                    console.error('Failed to load settings', err);
+                }
+            }
 
             // Theme Setting
             const themeBtns = document.querySelectorAll('#theme-options .setting-btn');
@@ -251,8 +296,23 @@
                 fontFamilyOptions.appendChild(btn);
             };
 
-            fetch('/api/fonts-config')
-                .then(res => res.json())
+            const fetchFontsConfig = async () => {
+                try {
+                    let res = await fetch('/api/fonts-config');
+                    if (!res.ok) throw new Error('API failed');
+                    return await res.json();
+                } catch(e) {
+                    try {
+                        let res = await fetch('/fonts-config.json');
+                        if (res.ok) return await res.json();
+                    } catch(err) {
+                        throw new Error('Failed to load fonts config');
+                    }
+                }
+                throw new Error('Could not load fonts');
+            };
+
+            fetchFontsConfig()
                 .then(data => {
                     fontFamilyOptions.innerHTML = '';
                     const addedFonts = [];

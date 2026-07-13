@@ -3,7 +3,11 @@
 (async function() {
     // Fetch and apply page visibility rules to hide nav links
     fetch('/api/page-visibility')
-        .then(res => res.json())
+        .then(res => {
+            if (!res.ok) throw new Error('API failed');
+            return res.json();
+        })
+        .catch(() => fetch('/page-visibility.json').then(res => res.json()).catch(() => ({})))
         .then(visibility => {
             const hiddenPages = Object.keys(visibility).filter(page => visibility[page] === false);
             if (hiddenPages.length > 0) {
@@ -19,11 +23,25 @@
         .catch(err => console.error('Failed to load page visibility', err));
 
     let settings = { theme: 'light', color: 'red', font: 'Outfit', fontSize: '16px', fontType: 'google', fontUrl: '' };
+    
+    // Fallback for Github Pages (no backend)
     try {
-        const res = await fetch('/api/site-settings');
-        if (res.ok) settings = await res.json();
+        const local = JSON.parse(localStorage.getItem('neobium-settings'));
+        if (local) settings = { ...settings, ...local };
+    } catch(e) {}
+
+    try {
+        let res = await fetch('/api/site-settings');
+        if (!res.ok) throw new Error('API failed');
+        settings = { ...settings, ...(await res.json()) };
     } catch(e) {
-        console.error('Failed to load site settings, using defaults', e);
+        try {
+            // Try static file for GitHub Pages
+            let res = await fetch('/site-settings.json');
+            if (res.ok) settings = { ...settings, ...(await res.json()) };
+        } catch(err) {
+            console.error('Failed to load site settings, using defaults', err);
+        }
     }
 
     // Allow non-admins to temporarily override theme locally

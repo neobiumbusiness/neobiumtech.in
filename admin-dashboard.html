@@ -205,6 +205,7 @@
             <div class="nav-item" onclick="switchView('view-security', this)">Security</div>
             <div class="nav-item" onclick="switchView('view-integrations', this)">Integrations</div>
             <div class="nav-item" onclick="switchView('view-responsive', this)">Responsive Design</div>
+            <div class="nav-item" onclick="switchView('view-github', this)">GitHub Connection</div>
         </div>
     </div>
 
@@ -440,7 +441,41 @@
         <div class="view-panel" id="view-performance"><div class="card"><h3>Performance Optimization</h3><p>Manage lazy loading, CSS minification, and browser caching rules.</p><button class="btn btn-success">Optimize Performance</button></div></div>
         <div class="view-panel" id="view-security"><div class="card"><h3>Security Policies</h3><p>Configure SSL enforcement, Content Security Policies (CSP), and rate limiting.</p><button class="btn btn-success">Apply Security</button></div></div>
         <div class="view-panel" id="view-integrations"><div class="card"><h3>Integrations & API</h3><p>Manage Google Analytics tags, Chatbots, and CRM webhooks.</p><button class="btn btn-success">Save Integrations</button></div></div>
-        <div class="view-panel" id="view-responsive"><div class="card"><h3>Responsive Design</h3><p>Configure breakpoints for Mobile, Tablet, and Desktop views.</p><button class="btn btn-success">Update Breakpoints</button></div></div>
+        <div class="view-panel" id="view-responsive">
+            <div class="card">
+                <h3>Responsive Layout Testing</h3>
+                <p class="text-muted">Test how the site looks on different devices.</p>
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                    <button class="btn btn-outline">Mobile View</button>
+                    <button class="btn btn-outline">Tablet View</button>
+                    <button class="btn btn-outline">Desktop View</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- GitHub Connection -->
+        <div class="view-panel" id="view-github">
+            <div class="card">
+                <h3>GitHub Serverless Integration</h3>
+                <p class="text-muted" style="margin-bottom: 1rem;">Configure your GitHub Personal Access Token (PAT) to save configurations directly to your repository when using the static GitHub Pages admin panel.</p>
+                
+                <div class="form-group">
+                    <label>Repository Owner (e.g. your-username)</label>
+                    <input type="text" class="form-control" id="gh-owner-settings" placeholder="e.g. johndoe">
+                </div>
+                <div class="form-group">
+                    <label>Repository Name</label>
+                    <input type="text" class="form-control" id="gh-repo-settings" placeholder="e.g. my-website">
+                </div>
+                <div class="form-group">
+                    <label>Personal Access Token (PAT)</label>
+                    <input type="password" class="form-control" id="gh-token-settings" placeholder="ghp_...">
+                    <small class="text-muted">Requires 'repo' scope.</small>
+                </div>
+                <button class="btn btn-primary" onclick="saveGithubSettings()">Save GitHub Credentials</button>
+            </div>
+        </div>
+
         <div class="view-panel" id="view-testing">
             <div class="card">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -467,7 +502,27 @@
 
     </div>
 
+    <script src="github-cms.js"></script>
     <script>
+        // GitHub Settings Script
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.githubCMS) {
+                document.getElementById('gh-owner-settings').value = window.githubCMS.owner || '';
+                document.getElementById('gh-repo-settings').value = window.githubCMS.repo || '';
+                document.getElementById('gh-token-settings').value = window.githubCMS.token || '';
+            }
+        });
+
+        function saveGithubSettings() {
+            const o = document.getElementById('gh-owner-settings').value.trim();
+            const r = document.getElementById('gh-repo-settings').value.trim();
+            const t = document.getElementById('gh-token-settings').value.trim();
+            if (window.githubCMS) {
+                window.githubCMS.saveCredentials(t, o, r);
+                alert('GitHub credentials saved locally!');
+            }
+        }
+
         // --- Authentication ---
         function checkAuth() {
             if(localStorage.getItem('neobium_admin') !== 'true') {
@@ -956,11 +1011,20 @@
 
         async function loadFontsConfig() {
             try {
-                const res = await fetch('/api/fonts-config');
+                let res = await fetch('/api/fonts-config');
+                if (!res.ok) throw new Error('API failed');
                 fontsConfig = await res.json();
                 renderFontsConfig();
             } catch (err) {
-                console.error('Failed to load fonts config', err);
+                try {
+                    let res = await fetch('/fonts-config.json');
+                    if (res.ok) {
+                        fontsConfig = await res.json();
+                        renderFontsConfig();
+                    }
+                } catch (e) {
+                    console.error('Failed to load fonts config', e);
+                }
             }
         }
 
@@ -1019,6 +1083,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(fontsConfig)
                 });
+                if (!res.ok) throw new Error('API failed');
                 const result = await res.json();
                 if (result.success) {
                     alert('Font configuration saved successfully!');
@@ -1026,7 +1091,17 @@
                     alert('Failed to save font configuration.');
                 }
             } catch (err) {
-                alert('Error saving font configuration.');
+                if (window.githubCMS) {
+                    const result = await window.githubCMS.pushFile(
+                        'fonts-config.json',
+                        JSON.stringify(fontsConfig, null, 2),
+                        'CMS Update: Updated Fonts Config'
+                    );
+                    if (result.success) alert('Font configuration saved successfully to GitHub!');
+                    else if (result.error !== 'GitHub credentials not provided.') alert('Failed to save to GitHub: ' + result.error);
+                } else {
+                    alert('Error saving font configuration.');
+                }
             }
         }
 
@@ -1071,11 +1146,20 @@
 
         async function loadPageVisibility() {
             try {
-                const res = await fetch('/api/page-visibility');
+                let res = await fetch('/api/page-visibility');
+                if (!res.ok) throw new Error('API failed');
                 pageVisibility = await res.json();
                 renderPageVisibility();
             } catch (err) {
-                console.error('Failed to load page visibility', err);
+                try {
+                    let res = await fetch('/page-visibility.json');
+                    if (res.ok) {
+                        pageVisibility = await res.json();
+                        renderPageVisibility();
+                    }
+                } catch (e) {
+                    console.error('Failed to load page visibility', e);
+                }
             }
         }
 
@@ -1117,6 +1201,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(pageVisibility)
                 });
+                if (!res.ok) throw new Error('API failed');
                 const result = await res.json();
                 if (result.success) {
                     alert('Page visibility saved successfully!');
@@ -1124,7 +1209,17 @@
                     alert('Failed to save page visibility.');
                 }
             } catch (err) {
-                alert('Error saving page visibility.');
+                if (window.githubCMS) {
+                    const result = await window.githubCMS.pushFile(
+                        'page-visibility.json',
+                        JSON.stringify(pageVisibility, null, 2),
+                        'CMS Update: Updated Page Visibility'
+                    );
+                    if (result.success) alert('Page visibility saved successfully to GitHub!');
+                    else if (result.error !== 'GitHub credentials not provided.') alert('Failed to save to GitHub: ' + result.error);
+                } else {
+                    alert('Error saving page visibility.');
+                }
             }
         }
 
