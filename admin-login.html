@@ -94,6 +94,11 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password })
                 });
+                
+                if (!res.ok && res.status !== 401) {
+                    throw new Error('API not available');
+                }
+                
                 const data = await res.json();
                 
                 if (data.success) {
@@ -104,9 +109,19 @@
                     document.getElementById('errorMsg').style.display = 'block';
                 }
             } catch (err) {
-                console.error("Login failed", err);
-                document.getElementById('errorMsg').innerText = 'An error occurred during login.';
-                document.getElementById('errorMsg').style.display = 'block';
+                console.warn("Backend login failed, using local fallback for static hosting:", err);
+                
+                // Fallback for static hosting (e.g. GitHub Pages)
+                if (email !== 'business.neobium@gmail.com') {
+                    document.getElementById('errorMsg').innerText = 'Email wrong';
+                    document.getElementById('errorMsg').style.display = 'block';
+                } else if (password !== 'Flynv245$#@@#$') {
+                    document.getElementById('errorMsg').innerText = 'Password wrong';
+                    document.getElementById('errorMsg').style.display = 'block';
+                } else {
+                    localStorage.setItem('neobium_admin', 'true');
+                    window.location.href = 'admin-dashboard.html';
+                }
             }
         });
 
