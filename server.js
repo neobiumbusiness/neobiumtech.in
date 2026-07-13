@@ -59,6 +59,44 @@ const MEDIA_DIR = path.join(UPLOADS_DIR, 'media'); // For other media sections
     }
 });
 
+// Site Settings Routes
+const SITE_SETTINGS_FILE = path.join(__dirname, 'site-settings.json');
+
+const getSiteSettings = () => {
+    try {
+        if (fs.existsSync(SITE_SETTINGS_FILE)) {
+            return JSON.parse(fs.readFileSync(SITE_SETTINGS_FILE, 'utf8'));
+        }
+    } catch (e) {
+        console.error('Error reading site settings', e);
+    }
+    return {
+        theme: 'light',
+        color: 'red',
+        font: 'Outfit',
+        fontSize: '16px',
+        fontType: 'google',
+        fontUrl: ''
+    };
+};
+
+app.get('/api/site-settings', (req, res) => {
+    res.json(getSiteSettings());
+});
+
+app.post('/api/site-settings', isAuthenticated, async (req, res) => {
+    try {
+        const currentSettings = getSiteSettings();
+        const newSettings = { ...currentSettings, ...req.body };
+        fs.writeFileSync(SITE_SETTINGS_FILE, JSON.stringify(newSettings, null, 2), 'utf8');
+        const gitResult = await pushToGitHub('site-settings.json', 'Updated Site Settings');
+        res.json({ success: true, git: gitResult });
+    } catch (error) {
+        console.error('Error saving site settings:', error);
+        res.status(500).json({ success: false, error: 'Failed to save site settings' });
+    }
+});
+
 // Fonts Config Routes
 const FONTS_CONFIG_FILE = path.join(__dirname, 'fonts-config.json');
 
@@ -85,11 +123,12 @@ app.get('/api/fonts-config', (req, res) => {
     }
 });
 
-app.post('/api/fonts-config', isAuthenticated, (req, res) => {
+app.post('/api/fonts-config', isAuthenticated, async (req, res) => {
     try {
         const newConfig = req.body;
         fs.writeFileSync(FONTS_CONFIG_FILE, JSON.stringify(newConfig, null, 2), 'utf8');
-        res.json({ success: true, message: 'Fonts configuration saved successfully.' });
+        const gitResult = await pushToGitHub('fonts-config.json', 'Updated Fonts Config');
+        res.json({ success: true, message: 'Fonts configuration saved successfully.', git: gitResult });
     } catch (error) {
         console.error('Error saving fonts config:', error);
         res.status(500).json({ success: false, error: 'Failed to save fonts config' });
@@ -97,7 +136,7 @@ app.post('/api/fonts-config', isAuthenticated, (req, res) => {
 });
 
 // Upload Custom Font Route
-app.post('/api/upload-font', isAuthenticated, (req, res) => {
+app.post('/api/upload-font', isAuthenticated, async (req, res) => {
     try {
         const { fileData, fileName } = req.body;
         
@@ -124,10 +163,12 @@ app.post('/api/upload-font', isAuthenticated, (req, res) => {
         
         fs.writeFileSync(filePath, Buffer.from(base64Data, 'base64'));
         
+        const gitResult = await pushToGitHub(`uploads/fonts/${safeFileName}`, 'Uploaded Custom Font');
+
         // Return the relative URL to the uploaded font
         const fileUrl = `/uploads/fonts/${safeFileName}`;
 
-        res.json({ success: true, message: 'Font uploaded successfully', fontUrl: fileUrl, fileName: safeFileName });
+        res.json({ success: true, message: 'Font uploaded successfully', fontUrl: fileUrl, fileName: safeFileName, git: gitResult });
     } catch (error) {
         console.error('Error uploading font:', error);
         res.status(500).json({ success: false, message: 'Failed to upload font file' });
@@ -223,7 +264,7 @@ app.delete('/api/pages/:filename', isAuthenticated, (req, res) => {
     });
 });
 
-app.post('/api/upload-logo', isAuthenticated, (req, res) => {
+app.post('/api/upload-logo', isAuthenticated, async (req, res) => {
     const { theme, imageBase64 } = req.body;
     
     if (!theme || !['light', 'dark'].includes(theme) || !imageBase64) {
@@ -243,9 +284,10 @@ app.post('/api/upload-logo', isAuthenticated, (req, res) => {
     
     const buffer = Buffer.from(matches[2], 'base64');
     
-    fs.writeFile(filepath, buffer, (err) => {
+    fs.writeFile(filepath, buffer, async (err) => {
         if (err) return res.status(500).json({ error: 'Failed to save logo' });
-        res.json({ success: true, message: `Logo for ${theme} theme saved successfully.` });
+        const gitResult = await pushToGitHub(`uploads/logos/${filename}`, `Uploaded ${theme} logo`);
+        res.json({ success: true, message: `Logo for ${theme} theme saved successfully.`, git: gitResult });
     });
 });
 
@@ -281,7 +323,7 @@ app.get('/api/page-visibility', (req, res) => {
     });
 });
 
-app.post('/api/page-visibility', isAuthenticated, (req, res) => {
+app.post('/api/page-visibility', isAuthenticated, async (req, res) => {
     try {
         const newConfig = req.body;
         newConfig['index.html'] = true;
@@ -289,7 +331,8 @@ app.post('/api/page-visibility', isAuthenticated, (req, res) => {
         newConfig['admin-login.html'] = true;
         newConfig['settings.html'] = true;
         fs.writeFileSync(VISIBILITY_CONFIG_FILE, JSON.stringify(newConfig, null, 2), 'utf8');
-        res.json({ success: true });
+        const gitResult = await pushToGitHub('page-visibility.json', 'Updated Page Visibility');
+        res.json({ success: true, git: gitResult });
     } catch (error) {
         console.error('Error saving visibility config:', error);
         res.status(500).json({ success: false });

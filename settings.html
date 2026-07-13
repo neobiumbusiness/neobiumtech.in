@@ -131,10 +131,25 @@
 
     <script src="main.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
+            function saveSiteSetting(key, value, extra = {}) {
+                const payload = { [key]: value, ...extra };
+                fetch('/api/site-settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                }).catch(console.error);
+            }
+
+            let settings = { theme: 'light', color: 'red', font: 'Outfit', fontSize: '16px', fontType: 'google', fontUrl: '' };
+            try {
+                const res = await fetch('/api/site-settings');
+                if (res.ok) settings = await res.json();
+            } catch(e) { console.error('Failed to load settings', e); }
+
             // Theme Setting
             const themeBtns = document.querySelectorAll('#theme-options .setting-btn');
-            const currentTheme = localStorage.getItem('neobium-theme') || 'light';
+            const currentTheme = settings.theme;
             
             themeBtns.forEach(btn => {
                 if (btn.dataset.themeValue === currentTheme) {
@@ -150,10 +165,10 @@
                     
                     // Apply & Save
                     document.documentElement.setAttribute('data-theme', theme);
-                    localStorage.setItem('neobium-theme', theme);
+                    saveSiteSetting('theme', theme);
 
                     // Update Logos dynamically
-                    const logoSrc = theme === 'light' ? 'logo-light.png' : 'logo-dark.png';
+                    const logoSrc = theme === 'light' ? '/uploads/logos/logo-light.png' : '/uploads/logos/logo-dark.png';
                     document.querySelectorAll('img[alt="Neobium Logo"]').forEach(img => {
                         img.setAttribute('src', logoSrc);
                         img.onerror = function() {
@@ -173,7 +188,7 @@
 
             // Color Setting
             const colorBtns = document.querySelectorAll('#color-options .setting-btn');
-            const currentColor = localStorage.getItem('neobium-color') || 'red';
+            const currentColor = settings.color;
             
             colorBtns.forEach(btn => {
                 if (btn.dataset.colorValue === currentColor) {
@@ -189,14 +204,14 @@
                     
                     // Apply & Save
                     document.documentElement.setAttribute('data-color', color);
-                    localStorage.setItem('neobium-color', color);
+                    saveSiteSetting('color', color);
                 });
             });
 
             // Font Family Setting (Dynamically loaded)
             const fontFamilyOptions = document.getElementById('font-family-options');
-            const currentFont = localStorage.getItem('neobium-font') || 'Outfit';
-                      const addFontBtn = (font, type) => {
+            const currentFont = settings.font;
+            const addFontBtn = (font, type) => {
                 if (font.enabled === false) return; // Allow if enabled is true or undefined
                 
                 // Dynamically load the font for previewing in the button if it's not Outfit
@@ -224,10 +239,10 @@
                     btn.classList.add('active');
                     
                     // Save state
-                    localStorage.setItem('neobium-font', font.name);
-                    localStorage.setItem('neobium-font-type', type);
-                    if (type === 'custom') localStorage.setItem('neobium-font-url', font.url);
-                    else localStorage.removeItem('neobium-font-url');
+                    saveSiteSetting('font', font.name, {
+                        fontType: type,
+                        fontUrl: type === 'custom' ? font.url : ''
+                    });
                     
                     // Apply immediately for Settings UI
                     document.documentElement.setAttribute('data-font', font.name);
@@ -267,7 +282,6 @@
                 .catch(err => {
                     console.error('Failed to load fonts API', err);
                     fontFamilyOptions.innerHTML = '';
-                    loadDefaultFonts();
                     
                     const errorMsg = document.createElement('div');
                     errorMsg.style = 'font-size: 0.9rem; color: var(--danger); width: 100%; text-align: center; margin-top: 10px;';
@@ -277,7 +291,7 @@
 
             // Font Size Setting
             const fontBtns = document.querySelectorAll('#font-options .setting-btn');
-            const currentFontSize = localStorage.getItem('neobium-font-size') || '16px';
+            const currentFontSize = settings.fontSize;
             
             fontBtns.forEach(btn => {
                 if (btn.dataset.fontValue === currentFontSize) {
@@ -293,7 +307,7 @@
                     
                     // Apply & Save
                     document.documentElement.style.setProperty('--base-font-size', size);
-                    localStorage.setItem('neobium-font-size', size);
+                    saveSiteSetting('fontSize', size);
                 });
             });
         });

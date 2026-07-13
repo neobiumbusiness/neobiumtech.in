@@ -1,6 +1,6 @@
 // apply-settings.js
-// This script runs synchronously in the <head> to prevent FOUC (Flash of Unstyled Content)
-(function() {
+// This script runs in the <head> to fetch settings and apply them.
+(async function() {
     // Fetch and apply page visibility rules to hide nav links
     fetch('/api/page-visibility')
         .then(res => res.json())
@@ -18,19 +18,27 @@
         })
         .catch(err => console.error('Failed to load page visibility', err));
 
-    const savedTheme = localStorage.getItem('neobium-theme') || 'light';
-    const savedColor = localStorage.getItem('neobium-color') || 'red';
-    const savedFont = localStorage.getItem('neobium-font') || 'Outfit';
-    const savedFontSize = localStorage.getItem('neobium-font-size') || '16px';
+    let settings = { theme: 'light', color: 'red', font: 'Outfit', fontSize: '16px', fontType: 'google', fontUrl: '' };
+    try {
+        const res = await fetch('/api/site-settings');
+        if (res.ok) settings = await res.json();
+    } catch(e) {
+        console.error('Failed to load site settings, using defaults', e);
+    }
+
+    // Allow non-admins to temporarily override theme locally
+    const savedTheme = localStorage.getItem('neobium-local-theme') || settings.theme || 'light';
+    const savedColor = settings.color || 'red';
+    const savedFont = settings.font || 'Outfit';
+    const savedFontSize = settings.fontSize || '16px';
+    const savedFontType = settings.fontType || 'google';
+    const savedFontUrl = settings.fontUrl || '';
     
     // Apply theme
     document.documentElement.setAttribute('data-theme', savedTheme);
     
     // Apply color scheme
     document.documentElement.setAttribute('data-color', savedColor);
-    
-    const savedFontType = localStorage.getItem('neobium-font-type') || 'google';
-    const savedFontUrl = localStorage.getItem('neobium-font-url') || '';
     
     // Dynamically inject Font Styles
     if (savedFontType === 'custom' && savedFontUrl) {
@@ -104,9 +112,25 @@
         toggleInput.addEventListener('change', (e) => {
             const newTheme = e.target.checked ? 'dark' : 'light';
             
-            // Apply & Save
+            // Apply
             document.documentElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('neobium-theme', newTheme);
+            
+            // Try to save globally if admin, else save locally
+            fetch('/api/site-settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ theme: newTheme })
+            }).then(res => {
+                if (!res.ok) {
+                    // User is not admin, save locally for their session
+                    localStorage.setItem('neobium-local-theme', newTheme);
+                } else {
+                    // Admin successfully saved globally
+                    localStorage.removeItem('neobium-local-theme');
+                }
+            }).catch(() => {
+                localStorage.setItem('neobium-local-theme', newTheme);
+            });
             
             // Update Logos
             const newLogoSrc = newTheme === 'light' ? '/uploads/logos/logo-light.png' : '/uploads/logos/logo-dark.png';

@@ -469,12 +469,23 @@
 
     <script>
         // --- Authentication ---
-        if(localStorage.getItem('neobium_admin') !== 'true') {
-            window.location.href = 'admin-login.html';
+        function checkAuth() {
+            if(localStorage.getItem('neobium_admin') !== 'true') {
+                window.location.replace('admin-login.html');
+            }
         }
+        checkAuth();
+        
+        // Prevent back-forward cache from showing the dashboard after logout
+        window.addEventListener('pageshow', (e) => {
+            if (e.persisted) checkAuth();
+        });
+
         function logout() {
             localStorage.removeItem('neobium_admin');
             fetch('/api/logout', { method: 'POST' }).finally(() => {
+                // Replace current history state with homepage so 'Back' from login goes to homepage
+                window.history.replaceState(null, '', 'index.html');
                 window.location.href = 'admin-login.html';
             });
         }
