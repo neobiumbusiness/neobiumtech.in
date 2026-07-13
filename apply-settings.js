@@ -93,7 +93,7 @@
     document.documentElement.style.setProperty('--base-font-size', savedFontSize);
 
     // Update logos when DOM is ready
-    document.addEventListener('DOMContentLoaded', () => {
+    const initLogosAndTheme = () => {
         const logoSrc = savedTheme === 'light' ? '/uploads/logos/logo-light.png' : '/uploads/logos/logo-dark.png';
         document.querySelectorAll('img[alt="Neobium Logo"]').forEach(img => {
             img.setAttribute('src', logoSrc);
@@ -176,5 +176,11 @@
             toggleWrapper.style.zIndex = '9999';
             document.body.appendChild(toggleWrapper);
         }
-    });
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initLogosAndTheme);
+    } else {
+        initLogosAndTheme();
+    }
 })();
