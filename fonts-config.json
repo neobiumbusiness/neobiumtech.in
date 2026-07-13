@@ -1,0 +1,41 @@
+{
+  "googleFonts": [
+    {
+      "name": "Outfit",
+      "enabled": true
+    },
+    {
+      "name": "Inter",
+      "enabled": true
+    },
+    {
+      "name": "Roboto",
+      "enabled": true
+    },
+    {
+      "name": "Poppins",
+      "enabled": true
+    },
+    {
+      "name": "Montserrat",
+      "enabled": true
+    },
+    {
+      "name": "Lato",
+      "enabled": true
+    },
+    {
+      "name": "Open Sans",
+      "enabled": true
+    },
+    {
+      "name": "Merriweather",
+      "enabled": true
+    },
+    {
+      "name": "Playfair Display",
+      "enabled": true
+    }
+  ],
+  "customFonts": []
+}
