@@ -213,7 +213,7 @@
                     saveSiteSetting('theme', theme);
 
                     // Update Logos dynamically
-                    const logoSrc = theme === 'light' ? '/uploads/media/white%20logo.png' : '/uploads/media/black%20logo.png';
+                    const logoSrc = theme === 'light' ? '/uploads/logos/logo-light.png' : '/uploads/logos/logo-dark.png';
                     document.querySelectorAll('img[alt="Neobium Logo"]').forEach(img => {
                         img.setAttribute('src', logoSrc);
                         img.onerror = function() {
