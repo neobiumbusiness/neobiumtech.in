@@ -186,7 +186,7 @@ h1, h2, h3, h4, h5, h6 {
     width: 100%;
     z-index: 1000;
     transition: var(--transition);
-    padding: 0.4rem 0;
+    padding: 1rem 0;
     background: transparent;
 }
 
@@ -194,7 +194,7 @@ h1, h2, h3, h4, h5, h6 {
     background: var(--header-bg);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    padding: 0.2rem 0;
+    padding: 0.5rem 0;
     border-bottom: 1px solid var(--border-color);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 }
@@ -206,7 +206,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .logo img {
-    height: 128px;
+    height: 70px;
 }
 
 .nav-list {
@@ -582,7 +582,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .footer-logo {
-    height: 135px;
+    height: 70px;
 }
 
 .footer h4 {
