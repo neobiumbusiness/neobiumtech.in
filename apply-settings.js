@@ -94,7 +94,7 @@
 
     // Update logos when DOM is ready
     const initLogosAndTheme = () => {
-        const logoSrc = savedTheme === 'light' ? '/uploads/logos/logo-light.png' : '/uploads/logos/logo-dark.png';
+        const logoSrc = savedTheme === 'light' ? '/uploads/logos/white%20logo%20(1).png' : '/uploads/logos/white%20logo%20(2).png';
         document.querySelectorAll('img[alt="Neobium Logo"]').forEach(img => {
             img.setAttribute('src', logoSrc);
             img.onerror = function() {
@@ -151,7 +151,7 @@
             });
             
             // Update Logos
-            const newLogoSrc = newTheme === 'light' ? '/uploads/logos/logo-light.png' : '/uploads/logos/logo-dark.png';
+            const newLogoSrc = newTheme === 'light' ? '/uploads/logos/white%20logo%20(1).png' : '/uploads/logos/white%20logo%20(2).png';
             document.querySelectorAll('img[alt="Neobium Logo"]').forEach(img => {
                 img.setAttribute('src', newLogoSrc);
                 img.onerror = function() {
