@@ -94,8 +94,8 @@ body {
 
 .header .container,
 .footer .container {
-    max-width: 1800px;
-    padding: 0 2rem;
+    max-width: 100%;
+    padding: 0 1rem;
 }
 
 /* Typography */
@@ -198,7 +198,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .logo img {
-    height: 180px;
+    height: 135px;
 }
 
 .nav-list {
@@ -573,7 +573,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .footer-logo {
-    height: 180px;
+    height: 135px;
 }
 
 .footer h4 {
