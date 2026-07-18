@@ -1,26 +1,8 @@
 // apply-settings.js
 // This script runs in the <head> to fetch settings and apply them.
 (async function() {
-    // Fetch and apply page visibility rules to hide nav links
-    fetch('/api/page-visibility')
-        .then(res => {
-            if (!res.ok) throw new Error('API failed');
-            return res.json();
-        })
-        .catch(() => fetch('/page-visibility.json').then(res => res.json()).catch(() => ({})))
-        .then(visibility => {
-            const hiddenPages = Object.keys(visibility).filter(page => visibility[page] === false);
-            if (hiddenPages.length > 0) {
-                const style = document.createElement('style');
-                let css = '';
-                hiddenPages.forEach(page => {
-                    css += `a[href="${page}"], a[href="/${page}"] { display: none !important; }\n`;
-                });
-                style.innerHTML = css;
-                document.head.appendChild(style);
-            }
-        })
-        .catch(err => console.error('Failed to load page visibility', err));
+    // Page visibility hiding logic disabled as per user request to keep all tabs visible on every page
+    // fetch('/api/page-visibility')...
 
     let settings = { theme: 'light', color: 'red', font: 'Outfit', fontSize: '16px', fontType: 'google', fontUrl: '' };
     
