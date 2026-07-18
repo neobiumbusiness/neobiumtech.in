@@ -211,8 +211,10 @@ h1, h2, h3, h4, h5, h6 {
 
 .logo img {
     height: 97px;
+    width: 280px;
+    object-fit: contain;
+    object-position: left center;
     display: block;
-    width: auto;
 }
 
 .nav-list {
@@ -600,6 +602,9 @@ h1, h2, h3, h4, h5, h6 {
 
 .footer-logo {
     height: 97px;
+    width: 280px;
+    object-fit: contain;
+    object-position: left center;
     display: block;
 }
 
